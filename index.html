@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alarma 30 Minutos</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { margin-bottom: 0.5rem; }
+        #timer {
+            font-size: 5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #3498db;
+            color: white;
+            transition: background 0.3s;
+        }
+        button:hover { background-color: #2980b9; }
+        .status {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Alarma Cíclica</h1>
+    <p>Cada 30 minutos sonará tu recordatorio</p>
+    
+    <div id="timer">30:00</div>
+
+    <button id="startBtn">Iniciar / Activar Sonido</button>
+    
+    <div class="status" id="statusText">Esperando inicio...</div>
+</div>
+
+<audio id="alarmSound" src="alarma.mp3" preload="auto"></audio>
+
+<script>
+    let timeLeft = 30 * 60; // 30 minutos en segundos
+    let timerInterval;
+    const timerDisplay = document.getElementById('timer');
+    const statusText = document.getElementById('statusText');
+    const alarmSound = document.getElementById('alarmSound');
+    const startBtn = document.getElementById('startBtn');
+
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        // Formato 00:00
+        timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            playSound();
+            timeLeft = 30 * 60; // Reiniciar a 30 minutos
+        } else {
+            timeLeft--;
+        }
+    }
+
+    function playSound() {
+        alarmSound.play().catch(error => console.log("Error al reproducir:", error));
+        statusText.textContent = "¡Alarma sonando! Reiniciando ciclo...";
+        
+        // El texto de estado vuelve a la normalidad después de 5 segundos
+        setTimeout(() => {
+            statusText.textContent = "Ciclo en progreso...";
+        }, 5000);
+    }
+
+    startBtn.addEventListener('click', () => {
+        // Reproducir y pausar inmediatamente para "desbloquear" el audio en el navegador
+        alarmSound.play().then(() => {
+            alarmSound.pause();
+            alarmSound.currentTime = 0;
+        });
+
+        if (!timerInterval) {
+            timerInterval = setInterval(updateTimer, 1000);
+            statusText.textContent = "Ciclo en progreso...";
+            startBtn.textContent = "Corriendo...";
+            startBtn.disabled = true;
+            startBtn.style.backgroundColor = "#95a5a6";
+        }
+    });
+</script>
+
+</body>
+</html>
